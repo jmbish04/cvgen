@@ -1,10 +1,7 @@
 class CVEditor {
     constructor() {
-        this.currentRole = 'backend';
         this.cvData = {};
-        this.schema = {};
         this.template = '';
-        this.validator = null;
         
         this.init();
     }
@@ -57,33 +54,25 @@ class CVEditor {
     async init() {
         this.setupEventListeners();
         
-        // Try to restore saved role from localStorage
-        const savedRole = this.loadFromStorage('currentRole');
-        if (savedRole) {
-            this.currentRole = savedRole;
-            document.getElementById('roleSelect').value = savedRole;
+        // Check for URL parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const dataUrl = urlParams.get('data');
+        
+        if (dataUrl) {
+            // Load from URL parameter
+            await this.loadFromUrl(dataUrl);
+        } else {
+            // Load default data from GitHub
+            await this.loadFromUrl('https://raw.githubusercontent.com/jobpare/cvgen/main/docs/cv-json-example/backend-cv-schema.json');
         }
         
-        await this.loadRole(this.currentRole);
         this.generateForm();
-        
-        // Try to restore saved CV data from localStorage
-        const savedData = this.loadFromStorage('cvData');
-        if (savedData) {
-            this.cvData = { ...this.cvData, ...savedData };
-            this.updateFormFromData();
-        }
-        
+        this.updateFormFromData();
         this.updateJSON();
         this.generatePreview();
     }
 
     setupEventListeners() {
-        // Role selector
-        document.getElementById('roleSelect').addEventListener('change', (e) => {
-            this.saveToStorage('currentRole', e.target.value);
-            this.loadRole(e.target.value);
-        });
 
         // View toggle
         document.getElementById('toggleView').addEventListener('click', () => {
@@ -128,21 +117,22 @@ class CVEditor {
         document.getElementById('fileInput').addEventListener('change', (e) => {
             this.loadFile(e.target.files[0]);
         });
+
+        // Generate PDF
+        document.getElementById('generatePDFBtn').addEventListener('click', () => {
+            this.generatePDF();
+        });
     }
 
-    async loadRole(role) {
-        this.currentRole = role;
-        
+    async loadFromUrl(url) {
         try {
-            // Load cv-schema once and use for both schema and data
-            const cvSchemaResponse = await fetch(`./cv-data/${role}/cv-schema.json`);
-            if (!cvSchemaResponse.ok) {
-                throw new Error(`Failed to load data: ${cvSchemaResponse.status}`);
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`Failed to load data: ${response.status}`);
             }
-            const cvData = await cvSchemaResponse.json();
+            const cvData = await response.json();
             
-            // Set both schema and data from the same response
-            this.schema = cvData;
+            // Set data
             this.cvData = cvData;
             
             // Load template (only once, cache it)
@@ -154,19 +144,12 @@ class CVEditor {
                 this.template = await templateResponse.text();
             }
             
-            // Skip validation for now - focus on core functionality
-            this.validator = null;
-
-            
-            // Update UI
-            this.generateForm();
-            this.updateFormFromData();
-            this.updateJSON();
-            this.generatePreview();
+            // Save to localStorage
+            this.saveToStorage('cvData', this.cvData);
             
         } catch (error) {
-            console.error('Error loading role data:', error.message);
-            this.showValidationMessage(`Error loading role data: ${error.message}`, 'error');
+            console.error('Error loading data from URL:', error.message);
+            this.showValidationMessage(`Error loading data: ${error.message}`, 'error');
         }
     }
 
@@ -433,23 +416,25 @@ class CVEditor {
         }
     }
 
+    generateHTML() {
+        // Register Handlebars helpers only once
+        if (!Handlebars.helpers.join) {
+            Handlebars.registerHelper('join', function(array, options) {
+                if (!array || !Array.isArray(array)) return '';
+                return array.join(', ');
+            });
+        }
+        
+        // Compile template and generate HTML
+        const template = Handlebars.compile(this.template);
+        return template(this.cvData);
+    }
+
     generatePreview() {
         const previewContainer = document.getElementById('previewContainer');
         
         try {
-            // Register Handlebars helpers only once
-            if (!Handlebars.helpers.join) {
-                Handlebars.registerHelper('join', function(array, options) {
-                    if (!array || !Array.isArray(array)) return '';
-                    return array.join(', ');
-                });
-            }
-            
-            // Compile template
-            const template = Handlebars.compile(this.template);
-            
-            // Generate HTML
-            const html = template(this.cvData);
+            const html = this.generateHTML();
             
             // Update preview with isolated iframe to prevent style conflicts
             previewContainer.innerHTML = `
@@ -511,9 +496,41 @@ class CVEditor {
     downloadJSON() {
         const jsonData = JSON.stringify(this.cvData, null, 2);
         const blob = new Blob([jsonData], { type: 'application/json' });
-        const filename = `cv-${this.currentRole}-${new Date().toISOString().split('T')[0]}.json`;
+        const filename = `cv-${new Date().toISOString().split('T')[0]}.json`;
         
         saveAs(blob, filename);
+    }
+
+    generatePDF() {
+        try {
+            const html = this.generateHTML();
+            
+            // Open new window with CV content
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>CV - ${this.cvData.personal_info.name}</title>
+                    <style>
+                        body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }
+                        @media print { body { margin: 0; padding: 0; } }
+                    </style>
+                </head>
+                <body>${html}</body>
+                </html>
+            `);
+            printWindow.document.close();
+            
+            // Trigger print dialog
+            setTimeout(() => {
+                printWindow.print();
+            }, 100);
+            
+        } catch (error) {
+            console.error('PDF generation failed:', error);
+            this.showValidationMessage('PDF generation failed. Please try again.', 'error');
+        }
     }
 
     async loadFile(file) {

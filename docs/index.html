@@ -16,23 +16,32 @@
                 <img src="img/jp_logo.png" alt="Jobpare Logo" class="logo">
                 <h1>Jobpare CV Generator</h1>
             </div>
-            <p>Create and edit your CV data with ease</p>
-            <a href="https://jobpare.com" target="_blank" class="website-link">
-                <i class="fas fa-external-link-alt"></i> jobpare.com
-            </a>
+            <div class="header-bottom">
+                <p>Create and edit your CV data with ease</p>
+                <a href="https://jobpare.com" target="_blank" class="website-link">
+                    <i class="fas fa-external-link-alt"></i> jobpare.com
+                </a>
+            </div>
         </header>
 
         <div class="main-content">
-            <!-- Role Selector -->
+            <!-- Top Controls -->
             <div class="role-selector">
-                <label for="roleSelect">Choose your role:</label>
-                <select id="roleSelect" class="role-dropdown">
-                    <option value="backend">Backend Developer</option>
-                    <option value="frontend">Frontend Developer</option>
-                    <option value="ai-ml">AI/ML Engineer</option>
-                    <option value="product-design">Product Designer</option>
-                    <option value="product-management">Product Manager</option>
-                </select>
+                <div class="actions-left">
+                    <button id="validateBtn" class="btn btn-secondary">
+                        <i class="fas fa-check-circle"></i> Validate
+                    </button>
+                    <button id="downloadBtn" class="btn btn-secondary">
+                        <i class="fas fa-download"></i> Download JSON
+                    </button>
+                    <button id="loadFileBtn" class="btn btn-secondary">
+                        <i class="fas fa-upload"></i> Load File
+                    </button>
+                </div>
+                <button id="generatePDFBtn" class="btn btn-primary">
+                    <i class="fas fa-file-pdf"></i> Generate PDF
+                </button>
+                <input type="file" id="fileInput" accept=".json" style="display: none;">
             </div>
 
             <div class="editor-layout">
@@ -88,20 +97,6 @@
                 </div>
             </div>
 
-            <!-- Actions -->
-            <div class="actions">
-                <button id="validateBtn" class="btn btn-secondary">
-                    <i class="fas fa-check-circle"></i> Validate
-                </button>
-                <button id="downloadBtn" class="btn btn-primary">
-                    <i class="fas fa-download"></i> Download JSON
-                </button>
-                <button id="loadFileBtn" class="btn btn-secondary">
-                    <i class="fas fa-upload"></i> Load File
-                </button>
-                <input type="file" id="fileInput" accept=".json" style="display: none;">
-            </div>
-
             <!-- Validation Messages -->
             <div id="validationMessages" class="validation-messages"></div>
         </div>
@@ -109,7 +104,8 @@
 
     <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.7.7/handlebars.min.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <script src="js/editor.js"></script>
 </body>

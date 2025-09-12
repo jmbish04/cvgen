@@ -81,6 +81,13 @@ body {
     margin: 32px 0;
 }
 
+.header-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+}
+
 .logo {
     height: 50px;
     width: auto;
@@ -139,31 +146,19 @@ body {
     padding: 20px;
     background: var(--bg-secondary);
     border-bottom: 1px solid var(--border-primary);
-    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
 }
 
-.role-selector label {
-    font-weight: 600;
-    margin-right: 10px;
-    color: var(--text-secondary);
+.actions-left {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
 }
 
-.role-dropdown {
-    padding: 8px 16px;
-    border: 2px solid var(--border-secondary);
-    border-radius: 6px;
-    font-size: 1rem;
-    background: var(--bg-tertiary);
-    color: var(--text-primary);
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.role-dropdown:focus {
-    outline: none;
-    border-color: var(--border-focus);
-    box-shadow: var(--focus-ring);
-}
 
 /* Editor layout */
 .editor-layout {
@@ -330,12 +325,8 @@ textarea.form-control {
 
 /* Actions */
 .actions {
-    padding: 20px;
-    background: var(--bg-secondary);
-    border-top: 1px solid var(--border-primary);
     display: flex;
     gap: 10px;
-    justify-content: center;
     flex-wrap: wrap;
 }
 
