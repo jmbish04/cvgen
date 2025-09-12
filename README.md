@@ -54,7 +54,7 @@ chmod +x src/generate.js
 #### 2.1. Open JSON Web Editor to customize your information
 
 1. Visit [https://jobpare.github.io/cvgen/](https://jobpare.github.io/cvgen/) (online editor)
-2. Choose your role from the dropdown (backend/frontend)
+2. Start with the backend developer example (or load your own JSON file)
 3. Edit your CV data using the form editor or JSON view
 4. See live preview of your CV as you type
 
@@ -79,19 +79,19 @@ chmod +x src/generate.js
 # Generate HTML file (recommended for most users)
 node src/generate.js generate \
   -t docs/cv-templates/template-1.html \
-  -i my-cv.json \
+  -i docs/cv-json-example/backend-cv-schema.json \
   -o output/my-cv.html
 
 # Generate PDF file
 node src/generate.js generate \
   -t docs/cv-templates/template-1.html \
-  -i my-cv.json \
+  -i docs/cv-json-example/frontend-cv-schema.json \
   -o output/my-cv.pdf
 
 # Validate your data before generating
 node src/generate.js generate \
   -t docs/cv-templates/template-1.html \
-  -i my-cv.json \
+  -i docs/cv-json-example/backend-cv-schema.json \
   --validate-only
 ```
 
@@ -126,9 +126,11 @@ cvgen delivers most of the output quality of LaTeX with a dramatically simpler s
 ## 📁 Project Structure
 
 ```
-jobpare-cv/
+jobpare-cvgen/
 ├── src/
-│   └── generate.js                   # 🧠 CLI generator
+│   ├── generate.js                   # 🧠 CLI generator
+│   └── validation/
+│       └── schema.js                  # 📋 JSON validation schema
 ├── docs/                             # 🌐 Web interface source
 │   ├── index.html                    # 📄 Web editor (deployed to GitHub Pages)
 │   ├── js/
@@ -136,32 +138,27 @@ jobpare-cv/
 │   ├── css/
 │   │   └── editor.css                # 🎨 Editor styles
 │   ├── cv-templates/
-│   │   └── template-1.html # 📄 HTML template
-│   └── cv-data/                      # 🎯 Role-specific guidance
-│       ├── backend/
-│       │   ├── cv-schema.json       # 👤 Data structure guide
-│       │   ├── skills.txt           # 🔧 Relevant skills
-│       │   └── action-verbs.txt     # 🚀 Power verbs
-│       └── frontend/
-│           ├── cv-schema.json       # 👤 Data structure guide
-│           ├── skills.txt           # 🔧 Relevant skills
-│           └── action-verbs.txt     # 🚀 Power verbs
+│   │   └── template-1.html           # 📄 HTML template
+│   ├── cv-json-example/              # 🎯 Example CV data
+│   │   ├── backend-cv-schema.json   # 👤 Backend developer example
+│   │   └── frontend-cv-schema.json   # 👤 Frontend developer example
+│   └── img/                          # 🖼️ Images and assets
 ├── output/                           # 📄 Generated CVs
 ├── package.json                      # 📦 Node.js dependencies
 └── README.md                         # This file
 ```
 
-## 🎯 Available Roles
+## 🎯 Available Examples
 
 ### Backend Developer
-- **Schema**: `docs/cv-data/backend/cv-schema.json`
+- **Example**: `docs/cv-json-example/backend-cv-schema.json`
 - **Skills**: Programming languages, frameworks, databases, cloud platforms
-- **Verbs**: Technical achievement and leadership verbs
+- **Focus**: Technical achievements, system design, mentoring
 
 ### Frontend Developer
-- **Schema**: `docs/cv-data/frontend/cv-schema.json`
+- **Example**: `docs/cv-json-example/frontend-cv-schema.json`
 - **Skills**: JavaScript frameworks, UI libraries, design tools
-- **Verbs**: Frontend-specific action verbs
+- **Focus**: User experience, design systems, performance optimization
 
 ## 📝 CV Data Format
 
@@ -257,16 +254,16 @@ Your CV data should follow this complete JSON structure:
 
 ```bash
 # Generate HTML file (recommended for most users)
-node src/generate.js generate -t docs/cv-templates/template-1.html -i my-cv.json -o output/cv.html
+node src/generate.js generate -t docs/cv-templates/template-1.html -i docs/cv-json-example/backend-cv-schema.json -o output/cv.html
 
 # Generate PDF file (requires Chrome/Chromium)
-node src/generate.js generate -t docs/cv-templates/template-1.html -i my-cv.json -o output/cv.pdf
+node src/generate.js generate -t docs/cv-templates/template-1.html -i docs/cv-json-example/frontend-cv-schema.json -o output/cv.pdf
 
 # Force HTML output even with .pdf extension
-node src/generate.js generate -t docs/cv-templates/template-1.html -i my-cv.json -o output/cv.pdf --html-only
+node src/generate.js generate -t docs/cv-templates/template-1.html -i docs/cv-json-example/backend-cv-schema.json -o output/cv.pdf --html-only
 
 # Validate data without generating output
-node src/generate.js generate -t docs/cv-templates/template-1.html -i my-cv.json --validate-only
+node src/generate.js generate -t docs/cv-templates/template-1.html -i docs/cv-json-example/backend-cv-schema.json --validate-only
 
 # Help
 node src/generate.js generate --help

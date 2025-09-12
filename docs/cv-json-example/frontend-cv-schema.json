@@ -5,9 +5,9 @@
     "email": "sarah.chen@email.com",
     "phone": "+1 (555) 987-6543",
     "location": "New York, NY",
-    "linkedin": "linkedin.com/in/sarahchen",
-    "github": "github.com/sarahchen",
-    "portfolio": "sarahchen.dev"
+    "linkedin": "https://linkedin.com/in/sarahchen",
+    "github": "https://github.com/sarahchen",
+    "portfolio": "https://sarahchen.dev"
   },
   "summary": {
     "professional_summary": "Creative and detail-oriented frontend developer with 6+ years of experience building responsive, accessible, and performant web applications. Specialized in React, TypeScript, and modern CSS. Passionate about user experience, design systems, and staying current with frontend technologies."
@@ -78,20 +78,20 @@
       "name": "E-commerce Platform",
       "description": "Modern e-commerce platform built with Next.js, featuring server-side rendering, dynamic routing, and integrated payment processing.",
       "technologies": ["Next.js", "TypeScript", "Tailwind CSS", "Stripe", "Prisma"],
-      "github_url": "github.com/sarahchen/ecommerce-platform",
-      "live_url": "demo.ecommerce-platform.com"
+      "github_url": "https://github.com/sarahchen/ecommerce-platform",
+      "live_url": "https://demo.ecommerce-platform.com"
     },
     {
       "name": "Task Management App",
       "description": "Real-time task management application with drag-and-drop functionality, team collaboration, and progress tracking.",
       "technologies": ["React", "TypeScript", "Socket.io", "Node.js", "MongoDB"],
-      "github_url": "github.com/sarahchen/task-manager"
+      "github_url": "https://github.com/sarahchen/task-manager"
     },
     {
       "name": "Design System",
       "description": "Comprehensive design system with 50+ reusable components, documentation, and Storybook integration.",
       "technologies": ["React", "Storybook", "TypeScript", "Styled Components", "Figma"],
-      "github_url": "github.com/sarahchen/design-system"
+      "github_url": "https://github.com/sarahchen/design-system"
     }
   ],
   "certifications": [

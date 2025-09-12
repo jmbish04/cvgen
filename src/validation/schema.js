@@ -164,7 +164,7 @@ export default {
           'name': { 'type': 'string', 'minLength': 1 },
           'issuer': { 'type': 'string', 'minLength': 1 },
           'date': { '$ref': '#/$defs/dateOrMonthYear' },
-          'expiry_date': { '$ref': '#/$defs/dateOrMonthYear' }
+          'expiry_date': { '$ref': '#/$defs/dateOrMonthYearOrNull' }
         },
         'additionalProperties': false
       }

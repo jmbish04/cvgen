@@ -5,9 +5,9 @@
     "email": "john.doe@email.com",
     "phone": "+1 (555) 123-4567",
     "location": "San Francisco, CA",
-    "linkedin": "linkedin.com/in/johndoe",
-    "github": "github.com/johndoe",
-    "portfolio": "johndoe.dev"
+    "linkedin": "https://linkedin.com/in/johndoe",
+    "github": "https://github.com/johndoe",
+    "portfolio": "https://johndoe.dev"
   },
   "summary": {
     "professional_summary": "Experienced backend developer with 5+ years building scalable web applications. Specialized in Python, Node.js, and cloud technologies. Passionate about clean code, system design, and mentoring junior developers."
@@ -62,14 +62,14 @@
       "name": "Task Management API",
       "description": "RESTful API for project management with real-time updates",
       "technologies": ["Node.js", "Express", "MongoDB", "Socket.io"],
-      "github_url": "github.com/johndoe/task-api",
-      "live_url": "task-api.johndoe.dev"
+      "github_url": "https://github.com/johndoe/task-api",
+      "live_url": "https://task-api.johndoe.dev"
     },
     {
       "name": "E-commerce Backend",
       "description": "Scalable backend system for online store with payment integration",
       "technologies": ["Python", "Django", "PostgreSQL", "Stripe"],
-      "github_url": "github.com/johndoe/ecommerce-api"
+      "github_url": "https://github.com/johndoe/ecommerce-api"
     }
   ],
   "certifications": [
