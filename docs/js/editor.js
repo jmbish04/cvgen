@@ -134,7 +134,7 @@ class CVEditor {
   async loadTemplate() {
     if (!this.template) {
       try {
-        const templateResponse = await fetch('./cv-templates/template-1.html');
+        const templateResponse = await fetch('cv-templates/template-1.html');
         if (!templateResponse.ok) {
           throw new Error(`Failed to load template: ${templateResponse.status}`);
         }
