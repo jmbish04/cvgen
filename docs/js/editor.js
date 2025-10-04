@@ -59,9 +59,8 @@ class CVEditor {
     const dataValue = urlParams.get('data');
 
     if (dataType === 'local') {
-      // Load from localStorage with specific key
-      const stored = this.loadFromStorage(dataValue);
-      this.cvData = stored || {};
+      // Don't initialize - wait for PostMessage
+      return;
     } else if (dataType === 'url') {
       // Load from external URL
       await this.loadFromUrl(dataValue, false);
@@ -613,13 +612,8 @@ window.addEventListener('message', (event) => {
     const storageKey = key ? `cvgen_${key}` : 'cvgen_cvData';
     localStorage.setItem(storageKey, JSON.stringify(data));
     
-    // Update editor if already initialized
-    if (window.cvEditorInstance) {
-      window.cvEditorInstance.cvData = data;
-      window.cvEditorInstance.updateFormFromData();
-      window.cvEditorInstance.updateJSON();
-      window.cvEditorInstance.generatePreview();
-    }
+    // Create editor
+    window.cvEditorInstance = new CVEditor();
   }
 });
 
