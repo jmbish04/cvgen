@@ -54,15 +54,23 @@ chmod +x src/generate.js
 #### 2.1. Open JSON Web Editor to customize your information
 
 1. Visit [https://jobpare.github.io/cvgen/](https://jobpare.github.io/cvgen/) (online editor)
-2. Start with the backend developer example (or load your own JSON file)
+2. The editor automatically loads the backend developer example
 3. Edit your CV data using the form editor or JSON view
 4. See live preview of your CV as you type
+5. Data is automatically saved to localStorage as you type
 
 ![CV JSON Editor](docs/img/js_cv_json_editor.png)
 
-#### 2.2. Save JSON
+#### 2.2. Load Different Examples
+- `?data=backend-cv-schema` - Backend developer example (default)
+- `?data=frontend-cv-schema` - Frontend developer example
+- `?data=my-custom-job` - Create new CV with custom job ID
+- `?data=https://api.example.com/cv/123` - Load from external URL
+
+#### 2.3. Save JSON
 - Click "Download JSON" to save your CV data as a JSON file
 - Save it as `my-cv.json` in your project directory
+- Data is automatically saved to localStorage with key `cvgen_{job_id}`
 
 ### 3. Pick Template + Format
 
@@ -106,6 +114,8 @@ Jobpare CV Generator uses a **modern web-based approach** combining HTML/CSS/Jav
 - **JSON Data**: Version control friendly, platform-independent format
 - **Templates**: Handlebars.js for flexible, logic-less templating
 - **Generation**: HTML output + PDF conversion via Puppeteer
+- **Preloading**: Automatic example CV loading for fast access and offline use
+- **URL-Driven**: Simple `?data=` parameter system for loading different CVs
 - **Curated Content**: Skills and action verbs lists compiled from most-used terms across the web
 
 ### Comparison with LaTeX Solutions
@@ -123,56 +133,96 @@ Jobpare CV Generator uses a **modern web-based approach** combining HTML/CSS/Jav
 
 cvgen delivers most of the output quality of LaTeX with a dramatically simpler setup and developer-friendly workflow.
 
-## 🌐 Integration: Injecting CV JSON from External Sites
+## 🌐 Integration
 
-You can now programmatically load CV JSON into the web editor at [https://jobpare.github.io/cvgen/](https://jobpare.github.io/cvgen/) from another website or web app. This enables seamless workflows, such as pre-filling the editor with user data from your own platform.
+Integrate the CV editor into your application using postMessage API.
 
-### How It Works
-- The editor listens for `postMessage` events of type `SET_CV_JSON`.
-- When a CV JSON object is received, it is saved to localStorage and loaded into the editor UI.
-- You can specify a custom localStorage key to align with URL parameter behavior.
+### Basic Integration
 
-### Integration Flow
-1. **Open the editor** in a new tab or iframe from your site:
-   ```js
-   const editorWindow = window.open('https://jobpare.github.io/cvgen/', '_blank');
-   // or, if using an iframe:
-   // const editorWindow = document.getElementById('cvgen-iframe').contentWindow;
-   ```
-2. **Send the CV JSON** to the editor using `postMessage`:
-   ```js
-   const cvJson = {
-     profile: { name: 'Jane Doe', email: 'jane@example.com' },
-     // ...rest of your CV data
-   };
-   editorWindow.postMessage({ 
-     type: 'SET_CV_JSON', 
-     data: cvJson,
-     key: 'cv_123453'  // Optional: specify localStorage key
-   }, 'https://jobpare.github.io');
-   ```
-3. **The editor will load the data** and save it to localStorage with the specified key.
+```js
+// Open editor in new window
+const editorWindow = window.open('https://jobpare.github.io/cvgen/', '_blank');
+
+// Send CV data to editor
+editorWindow.postMessage({
+  type: 'SET_CV_JSON',
+  data: {
+    profile: { name: 'John Doe', email: 'john@example.com' },
+    summary: 'Experienced developer...',
+    experiences: [/* ... */],
+    education: [/* ... */],
+    skills: { programming_languages: ['JavaScript', 'Python'] }
+  },
+  cv_id: 'user_123_cv'
+}, 'https://jobpare.github.io');
+```
+
+### Iframe Integration
+
+```html
+<iframe id="cv-editor" src="https://jobpare.github.io/cvgen/"></iframe>
+
+<script>
+  const iframe = document.getElementById('cv-editor');
+  iframe.onload = () => {
+    iframe.contentWindow.postMessage({
+      type: 'SET_CV_JSON',
+      data: { /* CV data */ },
+      cv_id: 'embedded_cv'
+    }, 'https://jobpare.github.io');
+  };
+</script>
+```
 
 ### Message Format
+
 ```js
 {
   type: 'SET_CV_JSON',
   data: { /* CV JSON object */ },
-  key: 'cv_123453'  // Optional: localStorage key (defaults to 'cvData')
+  cv_id: 'unique_cv_id'  // Required: used for localStorage key
 }
 ```
 
-### Security Notes
-- For MVP, all origins are accepted. For production, consider restricting allowed origins in the editor code.
-- No validation is performed on the received data.
-
-### Example Use Case
-- A job portal or HR tool can let users build a CV, then launch the editor with their data pre-filled for further editing and export.
+The editor will save data to localStorage with key `cvgen_{cv_id}` and update the URL to `?data={cv_id}`.
 
 ### URL Parameters
-- `?data_type=local&data=cv_123453` - Load from localStorage with specific key
-- `?data_type=url&data=https://...` - Load from external URL
-- No parameter - Use localStorage if available, otherwise load default data
+- `?data=cv_123453` - Load from localStorage with specific CV ID
+- `?data=https://api.example.com/cv/123` - Load from external URL
+- `?data=backend-cv-schema` - Load backend developer example
+- `?data=frontend-cv-schema` - Load frontend developer example
+- No parameter - Load backend developer example (default)
+
+### Preloading System
+The editor automatically preloads example CVs into localStorage:
+- **Backend Example**: `cvgen_backend-cv-schema`
+- **Frontend Example**: `cvgen_frontend-cv-schema`
+
+This ensures fast loading and offline availability of example data.
+
+## 🔗 URL Parameter System
+
+The editor uses a simple URL parameter system to load different CVs:
+
+### Supported Formats
+- **Job ID**: `?data=my-job-123` - Loads from localStorage with key `cvgen_my-job-123`
+- **External URL**: `?data=https://api.example.com/cv/123` - Fetches data from external URL
+- **Example CVs**: `?data=backend-cv-schema` or `?data=frontend-cv-schema` - Loads preloaded examples
+- **Default**: No parameter loads backend developer example
+
+### Examples
+```
+https://jobpare.github.io/cvgen/                           # Backend example (default)
+https://jobpare.github.io/cvgen/?data=frontend-cv-schema   # Frontend example
+https://jobpare.github.io/cvgen/?data=my-custom-cv        # Custom CV
+https://jobpare.github.io/cvgen/?data=https://api.com/cv  # External URL
+```
+
+### Data Persistence
+- All data is automatically saved to localStorage with key `cvgen_{job_id}`
+- Changes are saved in real-time as you type
+- Data persists between browser sessions
+- External URLs are fetched fresh each time
 
 ## 📁 Project Structure
 
