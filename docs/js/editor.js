@@ -607,37 +607,18 @@ window.addEventListener('message', (event) => {
   // Optionally, restrict allowed origins here (for MVP, accept all)
   // if (event.origin !== 'https://trusted-origin.com') return;
 
-  const { type, data } = event.data || {};
-  if (type === 'SET_CV_JSON' && typeof data === 'object' && data !== null) {
-    // Simple validation: require at least profile.name and profile.email
-    if (
-      data.profile &&
-      typeof data.profile.name === 'string' &&
-      typeof data.profile.email === 'string'
-    ) {
-      try {
-        // Save to localStorage
-        localStorage.setItem('cvgen_cvData', JSON.stringify(data));
-        // Update editor if already initialized
-        if (window.cvEditorInstance) {
-          window.cvEditorInstance.cvData = data;
-          window.cvEditorInstance.updateFormFromData();
-          window.cvEditorInstance.updateJSON();
-          window.cvEditorInstance.generatePreview();
-          window.cvEditorInstance.showValidationMessage('✅ CV loaded from external source!', 'success');
-        } else {
-          // If not initialized, will be loaded on next init
-        }
-      } catch (e) {
-        // Optionally notify user
-        if (window.cvEditorInstance) {
-          window.cvEditorInstance.showValidationMessage('❌ Failed to load external CV data', 'error');
-        }
-      }
-    } else {
-      if (window.cvEditorInstance) {
-        window.cvEditorInstance.showValidationMessage('❌ Invalid CV data received', 'error');
-      }
+  const { type, data, key } = event.data || {};
+  if (type === 'SET_CV_JSON' && data) {
+    // Save to localStorage with specified key or default to 'cvData'
+    const storageKey = key ? `cvgen_${key}` : 'cvgen_cvData';
+    localStorage.setItem(storageKey, JSON.stringify(data));
+    
+    // Update editor if already initialized
+    if (window.cvEditorInstance) {
+      window.cvEditorInstance.cvData = data;
+      window.cvEditorInstance.updateFormFromData();
+      window.cvEditorInstance.updateJSON();
+      window.cvEditorInstance.generatePreview();
     }
   }
 });

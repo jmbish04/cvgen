@@ -129,8 +129,8 @@ You can now programmatically load CV JSON into the web editor at [https://jobpar
 
 ### How It Works
 - The editor listens for `postMessage` events of type `SET_CV_JSON`.
-- When a valid CV JSON object is received, it is saved to localStorage and loaded into the editor UI.
-- The user will see a notification that their CV was loaded from an external source.
+- When a CV JSON object is received, it is saved to localStorage and loaded into the editor UI.
+- You can specify a custom localStorage key to align with URL parameter behavior.
 
 ### Integration Flow
 1. **Open the editor** in a new tab or iframe from your site:
@@ -145,22 +145,26 @@ You can now programmatically load CV JSON into the web editor at [https://jobpar
      profile: { name: 'Jane Doe', email: 'jane@example.com' },
      // ...rest of your CV data
    };
-   editorWindow.postMessage({ type: 'SET_CV_JSON', data: cvJson }, 'https://jobpare.github.io');
+   editorWindow.postMessage({ 
+     type: 'SET_CV_JSON', 
+     data: cvJson,
+     key: 'cv_123453'  // Optional: specify localStorage key
+   }, 'https://jobpare.github.io');
    ```
-3. **The editor will validate and load the data**. If valid, it will be saved to localStorage and shown to the user.
+3. **The editor will load the data** and save it to localStorage with the specified key.
 
 ### Message Format
 ```js
 {
   type: 'SET_CV_JSON',
-  data: { /* valid CV JSON object */ }
+  data: { /* CV JSON object */ },
+  key: 'cv_123453'  // Optional: localStorage key (defaults to 'cvData')
 }
 ```
 
 ### Security Notes
 - For MVP, all origins are accepted. For production, consider restricting allowed origins in the editor code.
-- The editor validates that the JSON contains at least `profile.name` and `profile.email`.
-- Invalid or malformed data will be ignored and not overwrite existing data.
+- No validation is performed on the received data.
 
 ### Example Use Case
 - A job portal or HR tool can let users build a CV, then launch the editor with their data pre-filled for further editing and export.
