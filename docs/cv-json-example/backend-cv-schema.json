@@ -1,5 +1,5 @@
 {
-  "personal_info": {
+  "profile": {
     "name": "John Doe",
     "position": "Senior Backend Developer",
     "email": "john.doe@email.com",
@@ -7,12 +7,10 @@
     "location": "San Francisco, CA",
     "linkedin": "https://linkedin.com/in/johndoe",
     "github": "https://github.com/johndoe",
-    "portfolio": "https://johndoe.dev"
+    "website": "https://johndoe.dev"
   },
-  "summary": {
-    "professional_summary": "Experienced backend developer with 5+ years building scalable web applications. Specialized in Python, Node.js, and cloud technologies. Passionate about clean code, system design, and mentoring junior developers."
-  },
-  "experience": [
+  "summary": "Experienced backend developer with 5+ years building scalable web applications. Specialized in Python, Node.js, and cloud technologies. Passionate about clean code, system design, and mentoring junior developers.",
+  "experiences": [
     {
       "company": "TechCorp Inc",
       "position": "Senior Backend Developer",
@@ -45,7 +43,7 @@
       "institution": "University of Technology",
       "degree": "Bachelor of Science",
       "field_of_study": "Computer Science",
-      "graduation_date": "05/2020",
+      "end_date": "05/2020",
       "gpa": "3.8/4.0"
     }
   ],

@@ -296,32 +296,35 @@
         <div class="cv-content">
           <header class="cv-header">
             <div class="cv-header__title">
-              <div class="cv-header__name">{{personal_info.name}}</div>
+              <div class="cv-header__name">{{profile.name}}</div>
               <p class="cv-header__position">
-                <span class="text--normal">{{personal_info.position}}</span>
+                <span class="text--normal">{{profile.position}}</span>
+                {{#if profile.seniority_level}}
+                <span class="text--normal"> • {{profile.seniority_level}}</span>
+                {{/if}}
               </p>
             </div>
             <div class="cv-header__contact">
-              {{#if personal_info.location}}
+              {{#if profile.location}}
               <div class="contact-item">
                 <div class="contact-item__text">
-                  <i data-lucide="map-pin" class="icon"></i> {{personal_info.location}}
+                  <i data-lucide="map-pin" class="icon"></i> {{profile.location}}
                 </div>
               </div>
               {{/if}}
               
-              {{#if personal_info.email}}
+              {{#if profile.email}}
               <div class="contact-item">
                 <div class="contact-item__text">
-                  <i data-lucide="mail" class="icon"></i> {{personal_info.email}}
+                  <i data-lucide="mail" class="icon"></i> {{profile.email}}
                 </div>
               </div>
               {{/if}}
               
-              {{#if personal_info.phone}}
+              {{#if profile.phone}}
               <div class="contact-item">
                 <div class="contact-item__text">
-                  <i data-lucide="phone" class="icon"></i> {{personal_info.phone}}
+                  <i data-lucide="phone" class="icon"></i> {{profile.phone}}
                 </div>
               </div>
               {{/if}}
@@ -331,18 +334,18 @@
           <div class="cv-layout">
             <div class="cv-main">
               <!-- Summary -->
-              {{#if summary.professional_summary}}
+              {{#if summary}}
               <div class="cv-section">
                 <div class="section-header"><div class="section-header__title">Summary</div></div>
-                <p class="cv-text">{{summary.professional_summary}}</p>
+                <p class="cv-text">{{summary}}</p>
               </div>
               {{/if}}
 
               <!-- Experience -->
-              {{#if experience}}
+              {{#if experiences}}
               <div class="cv-section">
                 <div class="section-header"><div class="section-header__title">Experience</div></div>
-                {{#each experience}}
+                {{#each experiences}}
                 <div class="cv-section">
                   <div class="experience-item">
                     <p class="experience-item__title">
@@ -410,7 +413,7 @@
                     <div class="education-item__title">{{institution}}</div>
                     <div class="education-details--flex">
                       <div class="cv-text--small">{{degree}} in {{field_of_study}}</div>
-                      <p class="cv-text--small">{{graduation_date}}</p>
+                      <p class="cv-text--small">{{end_date}}</p>
                     </div>
                   </div>
                   {{#if gpa}}
@@ -441,52 +444,17 @@
             </div>
 
             <div class="cv-sidebar">
-              <!-- Skills -->
+              <!-- Skills (dynamic categories) -->
               {{#if skills}}
               <div class="cv-section">
                 <div class="section-header"><div class="section-header__title">Skills</div></div>
                 <div class="cv-section">
-                  {{#if skills.programming_languages}}
+                  {{#each skills}}
                   <p class="skills-category">
-                    <span class="skills-category__label">Programming Languages:</span><br />
-                    <span class="skills-category__items">{{join skills.programming_languages}}</span>
+                    <span class="skills-category__label">{{@key}}:</span><br />
+                    <span class="skills-category__items">{{join this}}</span>
                   </p>
-                  {{/if}}
-                  
-                  {{#if skills.frameworks}}
-                  <p class="skills-category">
-                    <span class="skills-category__label">Frameworks:</span><br />
-                    <span class="skills-category__items">{{join skills.frameworks}}</span>
-                  </p>
-                  {{/if}}
-                  
-                  {{#if skills.databases}}
-                  <p class="skills-category">
-                    <span class="skills-category__label">Databases:</span><br />
-                    <span class="skills-category__items">{{join skills.databases}}</span>
-                  </p>
-                  {{/if}}
-                  
-                  {{#if skills.cloud_platforms}}
-                  <p class="skills-category">
-                    <span class="skills-category__label">Cloud & DevOps:</span><br />
-                    <span class="skills-category__items">{{join skills.cloud_platforms}}</span>
-                  </p>
-                  {{/if}}
-                  
-                  {{#if skills.tools}}
-                  <p class="skills-category">
-                    <span class="skills-category__label">Tools:</span><br />
-                    <span class="skills-category__items">{{join skills.tools}}</span>
-                  </p>
-                  {{/if}}
-                  
-                  {{#if skills.soft_skills}}
-                  <p class="skills-category">
-                    <span class="skills-category__label">Soft Skills:</span><br />
-                    <span class="skills-category__items">{{join skills.soft_skills}}</span>
-                  </p>
-                  {{/if}}
+                  {{/each}}
                 </div>
               </div>
               {{/if}}
@@ -494,26 +462,26 @@
               <!-- Portfolio -->
               <div class="cv-section">
                 <div class="section-header"><div class="section-header__title">Portfolio</div></div>
-                {{#if personal_info.linkedin}}
+                {{#if profile.linkedin}}
                 <div class="contact-item">
                   <div class="contact-item__text">
-                    <i data-lucide="linkedin" class="icon"></i> {{personal_info.linkedin}}
+                    <i data-lucide="linkedin" class="icon"></i> {{profile.linkedin}}
                   </div>
                 </div>
                 {{/if}}
                 
-                {{#if personal_info.github}}
+                {{#if profile.github}}
                 <div class="contact-item">
                   <div class="contact-item__text">
-                    <i data-lucide="github" class="icon"></i> {{personal_info.github}}
+                    <i data-lucide="github" class="icon"></i> {{profile.github}}
                   </div>
                 </div>
                 {{/if}}
                 
-                {{#if personal_info.portfolio}}
+                {{#if profile.website}}
                 <div class="portfolio-links">
                   <div class="contact-item__text">
-                    <i data-lucide="globe" class="icon"></i> {{personal_info.portfolio}}
+                    <i data-lucide="globe" class="icon"></i> {{profile.website}}
                   </div>
                 </div>
                 {{/if}}

@@ -1,16 +1,16 @@
 export default {
   'type': 'object',
-  'required': ['personal_info', 'summary', 'education', 'skills'],
+  'required': ['profile', 'summary', 'education', 'skills'],
   'errorMessage': {
     'required': {
-      'personal_info': 'Personal information is required',
-      'summary': 'Professional summary is required',
+      'profile': 'Profile information is required',
+      'summary': 'Summary is required',
       'education': 'Education section is required',
       'skills': 'Skills section is required'
     }
   },
   'properties': {
-    'personal_info': {
+    'profile': {
       'type': 'object',
       'required': ['name', 'position', 'email', 'phone'],
       'errorMessage': {
@@ -24,35 +24,27 @@ export default {
           'email': 'Invalid email format',
           'linkedin': 'LinkedIn must be a valid URL',
           'github': 'GitHub must be a valid URL',
-          'portfolio': 'Portfolio must be a valid URL'
+          'website': 'Website must be a valid URL'
         }
       },
       'properties': {
         'name': { 'type': 'string', 'minLength': 1 },
         'position': { 'type': 'string', 'minLength': 1 },
+        'seniority_level': { 'type': 'string', 'minLength': 1 },
         'email': { 'type': 'string', 'format': 'email' },
         'phone': { 'type': 'string', 'minLength': 5 },
         'location': { 'type': 'string', 'minLength': 1 },
         'linkedin': { 'type': 'string', 'format': 'uri' },
         'github': { 'type': 'string', 'format': 'uri' },
-        'portfolio': { 'type': 'string', 'format': 'uri' }
+        'website': { 'type': 'string', 'format': 'uri' }
       },
       'additionalProperties': false
     },
     'summary': {
-      'type': 'object',
-      'required': ['professional_summary'],
-      'errorMessage': {
-        'required': {
-          'professional_summary': 'Professional summary is required'
-        }
-      },
-      'properties': {
-        'professional_summary': { 'type': 'string', 'minLength': 10 }
-      },
-      'additionalProperties': false
+      'type': 'string',
+      'minLength': 10
     },
-    'experience': {
+    'experiences': {
       'type': 'array',
       'minItems': 1,
       'items': {
@@ -93,23 +85,23 @@ export default {
       'minItems': 1,
       'items': {
         'type': 'object',
-        'required': ['institution', 'degree', 'field_of_study', 'graduation_date'],
+        'required': ['institution', 'degree', 'field_of_study', 'end_date'],
         'errorMessage': {
           'required': {
             'institution': 'Institution is required',
             'degree': 'Degree is required',
             'field_of_study': 'Field of study is required',
-            'graduation_date': 'Graduation date is required'
+            'end_date': 'End date is required'
           },
           'properties': {
-            'graduation_date': 'Graduation date must be in YYYY-MM-DD or MM/YYYY format'
+            'end_date': 'End date must be in YYYY-MM-DD or MM/YYYY format'
           }
         },
         'properties': {
           'institution': { 'type': 'string', 'minLength': 1 },
           'degree': { 'type': 'string', 'minLength': 1 },
           'field_of_study': { 'type': 'string', 'minLength': 1 },
-          'graduation_date': { '$ref': '#/$defs/dateOrMonthYear' },
+          'end_date': { '$ref': '#/$defs/dateOrMonthYear' },
           'gpa': { 'type': 'string', 'minLength': 1 }
         },
         'additionalProperties': false
@@ -117,14 +109,10 @@ export default {
     },
     'skills': {
       'type': 'object',
-      'additionalProperties': true,
-      'properties': {
-        'programming_languages': { 'type': 'array', 'items': { 'type': 'string', 'minLength': 1 } },
-        'frameworks': { 'type': 'array', 'items': { 'type': 'string', 'minLength': 1 } },
-        'databases': { 'type': 'array', 'items': { 'type': 'string', 'minLength': 1 } },
-        'cloud_platforms': { 'type': 'array', 'items': { 'type': 'string', 'minLength': 1 } },
-        'tools': { 'type': 'array', 'items': { 'type': 'string', 'minLength': 1 } },
-        'soft_skills': { 'type': 'array', 'items': { 'type': 'string', 'minLength': 1 } }
+      // Allow any skill category key, each value must be an array of non-empty strings
+      'additionalProperties': {
+        'type': 'array',
+        'items': { 'type': 'string', 'minLength': 1 }
       }
     },
     'projects': {
@@ -200,3 +188,5 @@ export default {
   },
   'additionalProperties': false
 };
+
+

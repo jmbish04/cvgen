@@ -15,7 +15,7 @@ import puppeteer from 'puppeteer';
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
 import ajvErrors from 'ajv-errors';
-import ValidationSchema from './validation/schema.js';
+import ValidationSchema from './schema.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -156,7 +156,7 @@ class CVGenerator {
      * Basic validation of CV data structure
      */
   validateData(data) {
-    const requiredFields = ['personal_info', 'summary'];
+    const requiredFields = ['profile', 'summary'];
     const warnings = [];
 
     for (const field of requiredFields) {
@@ -165,8 +165,8 @@ class CVGenerator {
       }
     }
 
-    if (data.personal_info && !data.personal_info.name) {
-      warnings.push('Missing \'name\' in personal_info');
+    if (data.profile && !data.profile.name) {
+      warnings.push('Missing \'name\' in profile');
     }
 
     if (warnings.length > 0) {

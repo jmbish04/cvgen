@@ -123,6 +123,48 @@ Jobpare CV Generator uses a **modern web-based approach** combining HTML/CSS/Jav
 
 cvgen delivers most of the output quality of LaTeX with a dramatically simpler setup and developer-friendly workflow.
 
+## 🌐 Integration: Injecting CV JSON from External Sites
+
+You can now programmatically load CV JSON into the web editor at [https://jobpare.github.io/cvgen/](https://jobpare.github.io/cvgen/) from another website or web app. This enables seamless workflows, such as pre-filling the editor with user data from your own platform.
+
+### How It Works
+- The editor listens for `postMessage` events of type `SET_CV_JSON`.
+- When a valid CV JSON object is received, it is saved to localStorage and loaded into the editor UI.
+- The user will see a notification that their CV was loaded from an external source.
+
+### Integration Flow
+1. **Open the editor** in a new tab or iframe from your site:
+   ```js
+   const editorWindow = window.open('https://jobpare.github.io/cvgen/', '_blank');
+   // or, if using an iframe:
+   // const editorWindow = document.getElementById('cvgen-iframe').contentWindow;
+   ```
+2. **Send the CV JSON** to the editor using `postMessage`:
+   ```js
+   const cvJson = {
+     profile: { name: 'Jane Doe', email: 'jane@example.com' },
+     // ...rest of your CV data
+   };
+   editorWindow.postMessage({ type: 'SET_CV_JSON', data: cvJson }, 'https://jobpare.github.io');
+   ```
+3. **The editor will validate and load the data**. If valid, it will be saved to localStorage and shown to the user.
+
+### Message Format
+```js
+{
+  type: 'SET_CV_JSON',
+  data: { /* valid CV JSON object */ }
+}
+```
+
+### Security Notes
+- For MVP, all origins are accepted. For production, consider restricting allowed origins in the editor code.
+- The editor validates that the JSON contains at least `profile.name` and `profile.email`.
+- Invalid or malformed data will be ignored and not overwrite existing data.
+
+### Example Use Case
+- A job portal or HR tool can let users build a CV, then launch the editor with their data pre-filled for further editing and export.
+
 ## 📁 Project Structure
 
 ```
@@ -166,7 +208,7 @@ Your CV data should follow this complete JSON structure:
 
 ```json
 {
-  "personal_info": {
+  "profile": {
     "name": "Your Name",
     "position": "Your Target Position",
     "email": "your.email@example.com",
@@ -174,12 +216,10 @@ Your CV data should follow this complete JSON structure:
     "location": "City, State",
     "linkedin": "linkedin.com/in/yourprofile",
     "github": "github.com/yourusername",
-    "portfolio": "yourportfolio.com"
+    "website": "yourwebsite.com"
   },
-  "summary": {
-    "professional_summary": "2-3 sentences about your background, expertise, and career goals"
-  },
-  "experience": [
+  "summary": "2-3 sentences about your background, expertise, and career goals",
+  "experiences": [
     {
       "company": "Company Name",
       "position": "Job Title",
@@ -199,17 +239,14 @@ Your CV data should follow this complete JSON structure:
       "institution": "University Name",
       "degree": "Degree Type",
       "field_of_study": "Field of Study",
-      "graduation_date": "MM/YYYY",
+      "end_date": "MM/YYYY",
       "gpa": "GPA (optional)"
     }
   ],
   "skills": {
     "programming_languages": ["From skills.txt"],
     "frameworks": ["From skills.txt"],
-    "databases": ["From skills.txt"],
-    "cloud_platforms": ["From skills.txt"],
-    "tools": ["From skills.txt"],
-    "soft_skills": ["Your soft skills"]
+    "custom_category": ["Any dynamic skills you want"]
   },
   "projects": [
     {

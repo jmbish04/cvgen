@@ -54,17 +54,24 @@ class CVEditor {
   async init() {
     this.setupEventListeners();
 
-    // Check for URL parameter
-    const urlParams = new URLSearchParams(window.location.search);
-    const dataUrl = urlParams.get('data');
-
-    if (dataUrl) {
-      // Load from URL parameter
-      await this.loadFromUrl(dataUrl);
+    // 1. Try to load from localStorage first
+    const stored = this.loadFromStorage('cvData');
+    if (stored) {
+      this.cvData = stored;
     } else {
-      // Load default data from GitHub
-      await this.loadFromUrl('https://raw.githubusercontent.com/jobpare/cvgen/main/docs/cv-json-example/backend-cv-schema.json');
+      // 2. Check for URL parameter
+      const urlParams = new URLSearchParams(window.location.search);
+      const dataUrl = urlParams.get('data');
+      if (dataUrl) {
+        await this.loadFromUrl(dataUrl, false); // don't save to localStorage
+      } else {
+        // 3. Load default from GitHub
+        await this.loadFromUrl('https://raw.githubusercontent.com/jobpare/cvgen/main/docs/cv-json-example/backend-cv-schema.json', false); // don't save to localStorage
+      }
     }
+
+    // Always load template after data loading
+    await this.loadTemplate();
 
     this.generateForm();
     this.updateFormFromData();
@@ -124,7 +131,22 @@ class CVEditor {
     });
   }
 
-  async loadFromUrl(url) {
+  async loadTemplate() {
+    if (!this.template) {
+      try {
+        const templateResponse = await fetch('/cv-templates/template-1.html');
+        if (!templateResponse.ok) {
+          throw new Error(`Failed to load template: ${templateResponse.status}`);
+        }
+        this.template = await templateResponse.text();
+      } catch (error) {
+        console.error('Error loading template:', error.message);
+        this.showValidationMessage(`Error loading template: ${error.message}`, 'error');
+      }
+    }
+  }
+
+  async loadFromUrl(url, saveToStorage = false) {
     try {
       const response = await fetch(url);
       if (!response.ok) {
@@ -135,17 +157,10 @@ class CVEditor {
       // Set data
       this.cvData = cvData;
 
-      // Load template (only once, cache it)
-      if (!this.template) {
-        const templateResponse = await fetch('./cv-templates/template-1.html');
-        if (!templateResponse.ok) {
-          throw new Error(`Failed to load template: ${templateResponse.status}`);
-        }
-        this.template = await templateResponse.text();
+      // Only save to localStorage if explicitly requested (never for URL/default loads)
+      if (saveToStorage) {
+        this.saveToStorage('cvData', this.cvData);
       }
-
-      // Save to localStorage
-      this.saveToStorage('cvData', this.cvData);
 
     } catch (error) {
       console.error('Error loading data from URL:', error.message);
@@ -183,34 +198,35 @@ class CVEditor {
   getFormSections() {
     const sections = [];
 
-    // Personal Information
+    // Profile (formerly Personal Information)
     sections.push({
-      title: 'Personal Information',
+      title: 'Profile',
       fields: [
-        { name: 'personal_info.name', label: 'Full Name', type: 'text', required: true },
-        { name: 'personal_info.position', label: 'Position', type: 'text', required: true },
-        { name: 'personal_info.email', label: 'Email', type: 'email', required: true },
-        { name: 'personal_info.phone', label: 'Phone', type: 'text' },
-        { name: 'personal_info.location', label: 'Location', type: 'text' },
-        { name: 'personal_info.linkedin', label: 'LinkedIn', type: 'url' },
-        { name: 'personal_info.github', label: 'GitHub', type: 'url' },
-        { name: 'personal_info.portfolio', label: 'Portfolio', type: 'url' }
+        { name: 'profile.name', label: 'Full Name', type: 'text', required: true },
+        { name: 'profile.position', label: 'Position', type: 'text', required: true },
+        { name: 'profile.seniority_level', label: 'Seniority Level', type: 'text' },
+        { name: 'profile.email', label: 'Email', type: 'email', required: true },
+        { name: 'profile.phone', label: 'Phone', type: 'text' },
+        { name: 'profile.location', label: 'Location', type: 'text' },
+        { name: 'profile.linkedin', label: 'LinkedIn', type: 'url' },
+        { name: 'profile.github', label: 'GitHub', type: 'url' },
+        { name: 'profile.website', label: 'Website', type: 'url' }
       ]
     });
 
-    // Summary
+    // Summary (now flat string)
     sections.push({
       title: 'Professional Summary',
       fields: [
-        { name: 'summary.professional_summary', label: 'Summary', type: 'textarea', help: '2-3 sentences about your background and career goals' }
+        { name: 'summary', label: 'Summary', type: 'textarea', help: '2-3 sentences about your background and career goals' }
       ]
     });
 
-    // Experience
+    // Experiences (renamed from experience)
     sections.push({
-      title: 'Work Experience',
+      title: 'Work Experiences',
       fields: [
-        { name: 'experience', label: 'Experience (JSON array)', type: 'textarea', help: 'Enter as JSON array of experience objects' }
+        { name: 'experiences', label: 'Experiences (JSON array)', type: 'textarea', help: 'Enter as JSON array of experience objects' }
       ]
     });
 
@@ -218,7 +234,7 @@ class CVEditor {
     sections.push({
       title: 'Education',
       fields: [
-        { name: 'education', label: 'Education (JSON array)', type: 'textarea', help: 'Enter as JSON array of education objects' }
+        { name: 'education', label: 'Education (JSON array)', type: 'textarea', help: 'Enter as JSON array of education objects (uses end_date instead of graduation_date)' }
       ]
     });
 
@@ -488,11 +504,11 @@ class CVEditor {
     // Simple validation without Ajv
     const errors = [];
 
-    if (!this.cvData.personal_info || !this.cvData.personal_info.name) {
+    if (!this.cvData.profile || !this.cvData.profile.name) {
       errors.push('Name is required');
     }
 
-    if (!this.cvData.personal_info || !this.cvData.personal_info.email) {
+    if (!this.cvData.profile || !this.cvData.profile.email) {
       errors.push('Email is required');
     }
 
@@ -536,7 +552,7 @@ class CVEditor {
                 <!DOCTYPE html>
                 <html>
                 <head>
-                    <title>CV - ${this.cvData.personal_info.name}</title>
+                    <title>CV - ${this.cvData.profile && this.cvData.profile.name ? this.cvData.profile.name : 'CV'}</title>
                     <style>
                         body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }
                         @media print { body { margin: 0; padding: 0; } }
@@ -581,7 +597,47 @@ class CVEditor {
   }
 }
 
+  // Add postMessage listener for external CV JSON injection
+window.addEventListener('message', (event) => {
+  // Optionally, restrict allowed origins here (for MVP, accept all)
+  // if (event.origin !== 'https://trusted-origin.com') return;
+
+  const { type, data } = event.data || {};
+  if (type === 'SET_CV_JSON' && typeof data === 'object' && data !== null) {
+    // Simple validation: require at least profile.name and profile.email
+    if (
+      data.profile &&
+      typeof data.profile.name === 'string' &&
+      typeof data.profile.email === 'string'
+    ) {
+      try {
+        // Save to localStorage
+        localStorage.setItem('cvgen_cvData', JSON.stringify(data));
+        // Update editor if already initialized
+        if (window.cvEditorInstance) {
+          window.cvEditorInstance.cvData = data;
+          window.cvEditorInstance.updateFormFromData();
+          window.cvEditorInstance.updateJSON();
+          window.cvEditorInstance.generatePreview();
+          window.cvEditorInstance.showValidationMessage('✅ CV loaded from external source!', 'success');
+        } else {
+          // If not initialized, will be loaded on next init
+        }
+      } catch (e) {
+        // Optionally notify user
+        if (window.cvEditorInstance) {
+          window.cvEditorInstance.showValidationMessage('❌ Failed to load external CV data', 'error');
+        }
+      }
+    } else {
+      if (window.cvEditorInstance) {
+        window.cvEditorInstance.showValidationMessage('❌ Invalid CV data received', 'error');
+      }
+    }
+  }
+});
+
 // Initialize the editor when the page loads
 document.addEventListener('DOMContentLoaded', () => {
-  new CVEditor();
+  window.cvEditorInstance = new CVEditor();
 });
