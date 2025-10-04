@@ -54,19 +54,23 @@ class CVEditor {
   async init() {
     this.setupEventListeners();
 
-    // 1. Try to load from localStorage first
-    const stored = this.loadFromStorage('cvData');
-    if (stored) {
-      this.cvData = stored;
+    const urlParams = new URLSearchParams(window.location.search);
+    const dataParam = urlParams.get('data');
+
+    if (dataParam === 'localStorage') {
+      // Force use localStorage only
+      const stored = this.loadFromStorage('cvData');
+      this.cvData = stored || {};
+    } else if (dataParam) {
+      // Load from external URL only
+      await this.loadFromUrl(dataParam, false);
     } else {
-      // 2. Check for URL parameter
-      const urlParams = new URLSearchParams(window.location.search);
-      const dataUrl = urlParams.get('data');
-      if (dataUrl) {
-        await this.loadFromUrl(dataUrl, false); // don't save to localStorage
+      // Current behavior: localStorage first, then external URL fallback
+      const stored = this.loadFromStorage('cvData');
+      if (stored) {
+        this.cvData = stored;
       } else {
-        // 3. Load default from GitHub
-        await this.loadFromUrl('https://raw.githubusercontent.com/jobpare/cvgen/main/docs/cv-json-example/backend-cv-schema.json', false); // don't save to localStorage
+        await this.loadFromUrl('https://raw.githubusercontent.com/jobpare/cvgen/main/docs/cv-json-example/backend-cv-schema.json', false);
       }
     }
 
