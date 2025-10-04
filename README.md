@@ -166,8 +166,8 @@ You can now programmatically load CV JSON into the web editor at [https://jobpar
 - A job portal or HR tool can let users build a CV, then launch the editor with their data pre-filled for further editing and export.
 
 ### URL Parameters
-- `?data=localStorage` - Force use localStorage only
-- `?data=[URL]` - Load from external URL only
+- `?data_type=local&data=cv_123453` - Load from localStorage with specific key
+- `?data_type=url&data=https://...` - Load from external URL
 - No parameter - Use localStorage if available, otherwise load default data
 
 ## 📁 Project Structure

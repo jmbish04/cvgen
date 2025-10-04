@@ -55,17 +55,18 @@ class CVEditor {
     this.setupEventListeners();
 
     const urlParams = new URLSearchParams(window.location.search);
-    const dataParam = urlParams.get('data');
+    const dataType = urlParams.get('data_type');
+    const dataValue = urlParams.get('data');
 
-    if (dataParam === 'localStorage') {
-      // Force use localStorage only
-      const stored = this.loadFromStorage('cvData');
+    if (dataType === 'local') {
+      // Load from localStorage with specific key
+      const stored = this.loadFromStorage(dataValue);
       this.cvData = stored || {};
-    } else if (dataParam) {
-      // Load from external URL only
-      await this.loadFromUrl(dataParam, false);
+    } else if (dataType === 'url') {
+      // Load from external URL
+      await this.loadFromUrl(dataValue, false);
     } else {
-      // Current behavior: localStorage first, then external URL fallback
+      // Default behavior: localStorage first, then external URL fallback
       const stored = this.loadFromStorage('cvData');
       if (stored) {
         this.cvData = stored;
