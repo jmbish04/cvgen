@@ -165,6 +165,7 @@ editorWindow.postMessage({
 <script>
   const iframe = document.getElementById('cv-editor');
   iframe.onload = () => {
+    // Send CV data immediately - editor handles initialization timing
     iframe.contentWindow.postMessage({
       type: 'SET_CV_JSON',
       data: { /* CV data */ },

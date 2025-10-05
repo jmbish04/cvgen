@@ -2,7 +2,7 @@ class CVEditor {
   constructor() {
     this.cvData = {};
     this.template = '';
-    this.init();
+    this.initPromise = this.init();
   }
 
   // ===========================================
@@ -613,15 +613,22 @@ class CVEditor {
 // ===========================================
 
 // PostMessage listener for external CV JSON injection
-window.addEventListener('message', (event) => {
+window.addEventListener('message', async (event) => {
   const { type, data, cv_id } = event.data || {};
   if (type === 'SET_CV_JSON' && data && cv_id) {
-    if (window.cvEditorInstance) {
+    if (!window.cvEditorInstance) {
+      window.cvEditorInstance = new CVEditor();
+    }
+    
+    // Wait for editor to be ready
+    try {
+      await window.cvEditorInstance.initPromise;
+      
       const newUrl = `${window.location.origin}${window.location.pathname}?data=${cv_id}`;
       window.history.replaceState({}, '', newUrl);
       window.cvEditorInstance.updateDataAndSave(data);
-    } else {
-      window.cvEditorInstance = new CVEditor();
+    } catch (error) {
+      console.error('CVEditor initialization failed:', error);
     }
   }
 });
