@@ -49,6 +49,21 @@ npm install
 chmod +x src/generate.js
 ```
 
+### 1.1. Run Local Development Server
+
+```bash
+# Navigate to docs directory
+cd docs
+
+# Start local server on port 9000
+python3 -m http.server 9000
+
+# Or using Node.js (if you have serve installed)
+npx serve -s . -l 9000
+```
+
+**Access the editor at:** http://localhost:9000
+
 ### 2. Edit CV JSON
 
 #### 2.1. Open JSON Web Editor to customize your information
@@ -135,57 +150,74 @@ cvgen delivers most of the output quality of LaTeX with a dramatically simpler s
 
 ## 🌐 Integration
 
-Integrate the CV editor into your application using postMessage API.
+Integrate the CV editor into your application using the simple postMessage API. The editor accepts CV data and processes it silently.
+
+**Note:** The PostMessage integration is handled by `integration.js` which provides secure one-way communication to the CV editor.
 
 ### Basic Integration
 
 ```js
-// Open editor in new window
-const editorWindow = window.open('https://jobpare.github.io/cvgen/', '_blank');
+// Open CV editor
+const editorUrl = `https://jobpare.github.io/cvgen/?data=my-cv-123`;
+const editorWindow = window.open(editorUrl, '_blank');
 
-// Send CV data to editor
-editorWindow.postMessage({
-  type: 'SET_CV_JSON',
-  data: {
-    profile: { name: 'John Doe', email: 'john@example.com' },
-    summary: 'Experienced developer...',
-    experiences: [/* ... */],
-    education: [/* ... */],
-    skills: { programming_languages: ['JavaScript', 'Python'] }
-  },
-  cv_id: 'user_123_cv'
-}, 'https://jobpare.github.io');
+// Wait a moment for editor to load, then send data directly
+setTimeout(() => {
+  editorWindow.postMessage({
+    type: 'SET_CV_JSON',
+    data: {
+      profile: { name: 'John Doe', email: 'john@example.com' },
+      summary: 'Experienced developer...',
+      experiences: [/* ... */],
+      education: [/* ... */],
+      skills: { programming_languages: ['JavaScript', 'Python'] }
+    }
+  }, 'https://jobpare.github.io');
+}, 1000);
+
+// No need to listen for responses - data is processed silently
 ```
 
-### Iframe Integration
+### Simple Communication Flow
 
-```html
-<iframe id="cv-editor" src="https://jobpare.github.io/cvgen/"></iframe>
+The integration uses a straightforward approach:
 
-<script>
-  const iframe = document.getElementById('cv-editor');
-  iframe.onload = () => {
-    // Send CV data immediately - editor handles initialization timing
-    iframe.contentWindow.postMessage({
-      type: 'SET_CV_JSON',
-      data: { /* CV data */ },
-      cv_id: 'embedded_cv'
-    }, 'https://jobpare.github.io');
-  };
-</script>
-```
+1. **Open CV Editor** - Open the editor in a new window
+2. **Wait for Load** - Give the editor a moment to initialize
+3. **Send CV Data** - Send your CV data using `SET_CV_JSON`
+4. **Done** - Data is processed silently, no response needed
+
+This approach is ultra-simple and reliable for most use cases.
 
 ### Message Format
 
 ```js
 {
   type: 'SET_CV_JSON',
-  data: { /* CV JSON object */ },
-  cv_id: 'unique_cv_id'  // Required: used for localStorage key
+  data: { /* CV JSON object */ }
 }
 ```
 
-The editor will save data to localStorage with key `cvgen_{cv_id}` and update the URL to `?data={cv_id}`.
+### Response Format
+
+The editor processes data silently - no responses are sent back. Check the editor console for processing logs.
+
+### Security Considerations
+
+**Important:** Always validate the origin of PostMessage events for security:
+
+```js
+window.addEventListener('message', (event) => {
+  // Always check the origin
+  if (event.origin !== 'https://jobpare.github.io') return;
+  
+  // Process the message...
+});
+```
+
+**Never use `'*'` as target origin in production** - always specify the exact origin for security.
+
+The editor automatically loads data from localStorage using the URL parameter (`?data=my-cv-123`) and saves with key `cvgen_my-cv-123`. PostMessage data is immediately applied and saved.
 
 ### URL Parameters
 - `?data=cv_123453` - Load from localStorage with specific CV ID
@@ -195,11 +227,11 @@ The editor will save data to localStorage with key `cvgen_{cv_id}` and update th
 - No parameter - Load backend developer example (default)
 
 ### Preloading System
-The editor automatically preloads example CVs into localStorage:
-- **Backend Example**: `cvgen_backend-cv-schema`
+The editor automatically preloads example CVs into localStorage on first load:
+- **Backend Example**: `cvgen_backend-cv-schema` (default)
 - **Frontend Example**: `cvgen_frontend-cv-schema`
 
-This ensures fast loading and offline availability of example data.
+This ensures fast loading and offline availability of example data without requiring external requests.
 
 ## 🔗 URL Parameter System
 

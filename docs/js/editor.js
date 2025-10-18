@@ -3,18 +3,23 @@ class CVEditor {
     this.cvData = {};
     this.template = '';
     this.initPromise = this.init();
+
+    // Constants
+    this.DEBOUNCE_DELAY = 300;
+    this.SAVING_INDICATOR_DELAY = 1500;
+    this.VALIDATION_MESSAGE_TIMEOUT = 5000;
   }
 
   // ===========================================
   // INITIALIZATION & SETUP
   // ===========================================
-  
+
   async init() {
     await this.preloadExamples();
-    
+
     const cvId = this.getCurrentCvId();
-    this.cvData = this.loadFromStorage(cvId) || this.loadFromStorage('backend-cv-schema') || {};
-    
+    this.cvData = this.loadFromStorage(cvId) || this.getDefaultData();
+
     await this.loadTemplate();
     this.generateForm();
     this.setupEventListeners();
@@ -22,53 +27,59 @@ class CVEditor {
     this.updateJSON();
     this.generatePreview();
   }
-  
+
   getCurrentCvId() {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get('data') || 'backend-cv-schema';
   }
 
+  getDefaultData() {
+    return this.loadFromStorage('backend-cv-schema') || {};
+  }
+
   // ===========================================
   // DATA MANAGEMENT
   // ===========================================
-  
+
   saveToStorage(cvId, data) {
     try {
       const storageKey = `cvgen_${cvId}`;
       localStorage.setItem(storageKey, JSON.stringify(data));
       this.showSavingIndicator();
     } catch (error) {
-      console.warn('Failed to save to localStorage:', error);
       this.showValidationMessage('Failed to save data locally', 'error');
     }
   }
-  
+
   loadFromStorage(cvId) {
     try {
       const storageKey = `cvgen_${cvId}`;
       const data = localStorage.getItem(storageKey);
       return data ? JSON.parse(data) : null;
     } catch (error) {
-      console.warn('Failed to load from localStorage:', error);
       this.showValidationMessage('Failed to load data from storage', 'error');
       return null;
     }
   }
-  
+
   updateDataAndSave(newData) {
     this.cvData = newData;
-    this.saveToStorage(this.getCurrentCvId(), this.cvData);
+    this.updateAll();
+  }
+
+  updateAll() {
     this.updateFormFromData();
     this.updateJSON();
     this.generatePreview();
+    this.saveToStorage(this.getCurrentCvId(), this.cvData);
   }
-  
+
   getNestedValue(obj, path) {
     return path.split('.').reduce((current, key) => {
       return current && current[key] !== undefined ? current[key] : undefined;
     }, obj);
   }
-  
+
   setNestedValue(obj, path, value) {
     const keys = path.split('.');
     const lastKey = keys.pop();
@@ -79,6 +90,16 @@ class CVEditor {
       return current[key];
     }, obj);
     target[lastKey] = value;
+  }
+
+  setFieldValue(field, fieldValue) {
+    if (fieldValue !== undefined) {
+      if (typeof fieldValue === 'object') {
+        field.value = JSON.stringify(fieldValue, null, 2);
+      } else {
+        field.value = fieldValue;
+      }
+    }
   }
 
   // ===========================================
@@ -267,13 +288,7 @@ class CVEditor {
 
     // Set value from current data (handle nested fields)
     const fieldValue = this.getNestedValue(this.cvData, field.name);
-    if (fieldValue !== undefined) {
-      if (typeof fieldValue === 'object') {
-        input.value = JSON.stringify(fieldValue, null, 2);
-      } else {
-        input.value = fieldValue;
-      }
-    }
+    this.setFieldValue(input, fieldValue);
 
     fieldDiv.appendChild(input);
 
@@ -288,65 +303,51 @@ class CVEditor {
   }
 
   addFormEventListeners() {
-    // Store bound function reference to ensure proper cleanup
-    if (!this.boundHandleFormInput) {
-      this.boundHandleFormInput = this.handleFormInput.bind(this);
-    }
-    
-    // Remove existing listeners to prevent memory leaks
-    const existingFields = document.querySelectorAll('.form-control');
-    existingFields.forEach(field => {
-      field.removeEventListener('input', this.boundHandleFormInput);
-    });
-    
-    // Add new listeners
     const formFields = document.querySelectorAll('.form-control');
     formFields.forEach(field => {
-      field.addEventListener('input', this.boundHandleFormInput);
+      field.addEventListener('input', this.handleFormInput.bind(this));
     });
   }
-  
+
   handleFormInput(event) {
     const field = event.target;
     const fieldName = field.dataset.field;
-    
+
     // Safety check for field name
     if (!fieldName) {
-      console.warn('Form field missing dataset.field:', field);
       return;
     }
-    
+
     let value = field.value;
-    
+
     // Parse JSON for textarea fields
     if (field.tagName === 'TEXTAREA' && !fieldName.includes('.')) {
       try {
         value = JSON.parse(field.value);
       } catch (e) {
         // Keep as string if parsing fails
-        console.warn('Failed to parse JSON in field:', fieldName, e.message);
       }
     }
-    
+
     this.setNestedValue(this.cvData, fieldName, value);
-    
+
     // Debounce expensive operations
     clearTimeout(this.updateTimeout);
     this.updateTimeout = setTimeout(() => {
       this.updateDataAndSave(this.cvData);
-    }, 300);
+    }, this.DEBOUNCE_DELAY);
   }
 
 
   // ===========================================
   // JSON MANAGEMENT
   // ===========================================
-  
+
   updateJSON() {
     const jsonEditor = document.getElementById('jsonEditor');
     jsonEditor.value = JSON.stringify(this.cvData, null, 2);
   }
-  
+
   updateFromJSON(jsonText) {
     try {
       const newData = JSON.parse(jsonText);
@@ -355,7 +356,7 @@ class CVEditor {
       this.showValidationMessage('❌ Invalid JSON format', 'error');
     }
   }
-  
+
   formatJSON() {
     const jsonEditor = document.getElementById('jsonEditor');
     try {
@@ -371,20 +372,14 @@ class CVEditor {
     formFields.forEach(field => {
       const fieldName = field.dataset.field;
       const fieldValue = this.getNestedValue(this.cvData, fieldName);
-      if (fieldValue !== undefined) {
-        if (typeof fieldValue === 'object') {
-          field.value = JSON.stringify(fieldValue, null, 2);
-        } else {
-          field.value = fieldValue;
-        }
-      }
+      this.setFieldValue(field, fieldValue);
     });
   }
 
   // ===========================================
   // PREVIEW MANAGEMENT
   // ===========================================
-  
+
   async loadTemplate() {
     if (!this.template) {
       try {
@@ -393,26 +388,27 @@ class CVEditor {
           throw new Error(`Failed to load template: ${templateResponse.status}`);
         }
         this.template = await templateResponse.text();
+
+        // Register Handlebars helper if not already registered
+        if (!Handlebars.helpers.join) {
+          Handlebars.registerHelper('join', function(array) {
+            return array ? array.join(', ') : '';
+          });
+        }
       } catch (error) {
-        console.error('Error loading template:', error.message);
         this.showValidationMessage(`Error loading template: ${error.message}`, 'error');
       }
     }
   }
-  
+
   generateHTML() {
-    if (!Handlebars.helpers.join) {
-      Handlebars.registerHelper('join', function(array) {
-        return array ? array.join(', ') : '';
-      });
-    }
     const template = Handlebars.compile(this.template);
     return template(this.cvData);
   }
-  
+
   generatePreview() {
     const previewContainer = document.getElementById('previewContainer');
-    
+
     try {
       const html = this.generateHTML();
       this.updatePreviewContainer(html, previewContainer);
@@ -420,17 +416,17 @@ class CVEditor {
       this.showPreviewError(error, previewContainer);
     }
   }
-  
+
   updatePreviewContainer(html, container) {
     // Create iframe safely
     const iframe = document.createElement('iframe');
     iframe.id = 'previewFrame';
     iframe.style.cssText = 'width: 100%; height: auto; min-height: 400px; border: 1px solid #ddd; border-radius: 4px; display: block;';
     iframe.srcdoc = html; // Let browser handle escaping
-    
+
     container.innerHTML = '';
     container.appendChild(iframe);
-    
+
     // Auto-resize iframe
     iframe.onload = () => {
       try {
@@ -448,7 +444,7 @@ class CVEditor {
       }
     };
   }
-  
+
   showPreviewError(error, container) {
     container.innerHTML = `
       <div class="preview-placeholder">
@@ -462,7 +458,7 @@ class CVEditor {
   // ===========================================
   // UI MANAGEMENT
   // ===========================================
-  
+
   toggleView() {
     const formPanel = document.getElementById('formPanel');
     const jsonPanel = document.getElementById('jsonPanel');
@@ -488,10 +484,10 @@ class CVEditor {
     messageDiv.className = `validation-${type}`;
     messageDiv.textContent = message;
     messages.appendChild(messageDiv);
-    
-    setTimeout(() => messageDiv.remove(), 5000);
+
+    setTimeout(() => messageDiv.remove(), this.VALIDATION_MESSAGE_TIMEOUT);
   }
-  
+
   showSavingIndicator() {
     let indicator = document.getElementById('savingIndicator');
     if (!indicator) {
@@ -501,28 +497,28 @@ class CVEditor {
       indicator.innerHTML = '<i class="fas fa-save"></i> Saved';
       document.body.appendChild(indicator);
     }
-    
+
     indicator.classList.add('show');
     clearTimeout(this.savingTimeout);
     this.savingTimeout = setTimeout(() => {
       indicator.classList.remove('show');
-    }, 1500);
+    }, this.SAVING_INDICATOR_DELAY);
   }
-  
+
   validateData() {
     const messages = document.getElementById('validationMessages');
     messages.innerHTML = '';
-    
+
     const errors = [];
-    
+
     if (!this.cvData.profile || !this.cvData.profile.name) {
       errors.push('Name is required');
     }
-    
+
     if (!this.cvData.profile || !this.cvData.profile.email) {
       errors.push('Email is required');
     }
-    
+
     if (errors.length === 0) {
       this.showValidationMessage('✅ CV data looks good!', 'success');
     } else {
@@ -535,19 +531,19 @@ class CVEditor {
   // ===========================================
   // FILE OPERATIONS
   // ===========================================
-  
+
   downloadJSON() {
     const jsonData = JSON.stringify(this.cvData, null, 2);
     const blob = new Blob([jsonData], { type: 'application/json' });
     const filename = `cv-${new Date().toISOString().split('T')[0]}.json`;
-    
+
     saveAs(blob, filename);
   }
-  
+
   generatePDF() {
     try {
       const html = this.generateHTML();
-      
+
       const printWindow = window.open('', '_blank');
       printWindow.document.write(`
         <!DOCTYPE html>
@@ -563,20 +559,19 @@ class CVEditor {
         </html>
       `);
       printWindow.document.close();
-      
+
       setTimeout(() => {
         printWindow.print();
       }, 100);
-      
+
     } catch (error) {
-      console.error('PDF generation failed:', error);
       this.showValidationMessage('PDF generation failed. Please try again.', 'error');
     }
   }
-  
+
   async loadFile(file) {
     if (!file) return;
-    
+
     try {
       const text = await file.text();
       const data = JSON.parse(text);
@@ -586,10 +581,10 @@ class CVEditor {
       this.showValidationMessage('❌ Error loading file: ' + error.message, 'error');
     }
   }
-  
+
   async preloadExamples() {
     const exampleFiles = ['backend-cv-schema', 'frontend-cv-schema'];
-    
+
     for (const filename of exampleFiles) {
       const key = `cvgen_${filename}`;
       if (!localStorage.getItem(key)) {
@@ -600,7 +595,7 @@ class CVEditor {
             localStorage.setItem(key, JSON.stringify(data));
           }
         } catch (error) {
-          console.warn(`Failed to preload ${filename}:`, error);
+          // Ignore preload errors
         }
       }
     }
@@ -611,27 +606,6 @@ class CVEditor {
 // ===========================================
 // GLOBAL INITIALIZATION
 // ===========================================
-
-// PostMessage listener for external CV JSON injection
-window.addEventListener('message', async (event) => {
-  const { type, data, cv_id } = event.data || {};
-  if (type === 'SET_CV_JSON' && data && cv_id) {
-    if (!window.cvEditorInstance) {
-      window.cvEditorInstance = new CVEditor();
-    }
-    
-    // Wait for editor to be ready
-    try {
-      await window.cvEditorInstance.initPromise;
-      
-      const newUrl = `${window.location.origin}${window.location.pathname}?data=${cv_id}`;
-      window.history.replaceState({}, '', newUrl);
-      window.cvEditorInstance.updateDataAndSave(data);
-    } catch (error) {
-      console.error('CVEditor initialization failed:', error);
-    }
-  }
-});
 
 // Initialize the editor when the page loads
 document.addEventListener('DOMContentLoaded', () => {

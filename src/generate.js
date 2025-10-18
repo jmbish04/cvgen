@@ -9,7 +9,7 @@ import { program } from 'commander';
 import chalk from 'chalk';
 import fs from 'fs-extra';
 import path from 'path';
-import { fileURLToPath } from 'url';
+// import { fileURLToPath } from 'url'; // Not used in current implementation
 import Handlebars from 'handlebars';
 import puppeteer from 'puppeteer';
 import Ajv from 'ajv';
@@ -17,8 +17,7 @@ import addFormats from 'ajv-formats';
 import ajvErrors from 'ajv-errors';
 import ValidationSchema from './schema.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Note: __dirname not used in current implementation
 
 // Initialize JSON schema validator
 const ajv = new Ajv({ allErrors: true, strict: false });
@@ -27,8 +26,6 @@ ajvErrors(ajv);
 
 class CVGenerator {
   constructor() {
-    this.templates = {};
-    this.schemas = {};
     this.ajvValidate = ajv.compile(ValidationSchema);
   }
 
@@ -68,7 +65,7 @@ class CVGenerator {
       const templateContent = await fs.readFile(templatePath, 'utf-8');
 
       // Register Handlebars helpers
-      Handlebars.registerHelper('join', function(array, options) {
+      Handlebars.registerHelper('join', function(array) {
         if (!array || !Array.isArray(array)) return '';
         return array.join(', ');
       });
