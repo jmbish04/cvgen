@@ -9,37 +9,42 @@
 ![GitHub forks](https://img.shields.io/github/forks/jobpare/cvgen?style=social)
 ![GitHub license](https://img.shields.io/github/license/jobpare/cvgen)
 ![Made with Node.js](https://img.shields.io/badge/Made%20with-Node.js-blue)
+![Cloudflare Workers](https://img.shields.io/badge/Cloudflare-Workers-orange)
 ![CLI Tool](https://img.shields.io/badge/CLI-Tool-informational)
 
 
-A local-first tool to generate beautiful, professional CVs from JSON data and HTML templates. Perfect for developers, designers, and professionals who want full control over their CV presentation.
+A professional CV/Resume generator available as both a local CLI tool and a cloud-based API powered by Cloudflare Workers. Perfect for developers, designers, and professionals who want full control over their CV presentation.
 
+## ✨ Two Deployment Options
+
+### 🖥️ Local CLI Tool
 - 🧠 **JSON-based data input** - Easy to edit and version control
 - 🖨️ **PDF output** - High-quality, print-ready CVs using Puppeteer
 - 🔧 **Local-first** - No cloud dependencies, your data stays private
-- 🎨 **Web-based editor** - Visual editor with live preview ([CV-JSON Web Editor](https://jobpare.github.io/cvgen/))
+- 🎨 **Web-based editor** - Visual editor with live preview
 - 📱 **CLI tool** - Command-line interface for automation
-- 🎯 **Role-specific guidance** - Skills, verbs, and schema for different roles
 
-## 📋 Requirements
+### ☁️ Cloudflare Worker API (NEW!)
+- 🚀 **RESTful API** - Generate CVs via HTTP endpoints
+- 📦 **R2 Storage** - Automatic storage of HTML, PDF, and Markdown formats
+- 🗄️ **D1 Database** - Complete request logging and history
+- 🤖 **AI Agent** - RAG-powered career advisor for CV insights
+- 🔍 **Vector Search** - Semantic search through your CV history
+- 📚 **OpenAPI** - Auto-generated API documentation
+- 🌐 **Web Interface** - Full-featured frontend for CV creation and management
 
-Before you begin, ensure you have the following installed:
+## 🚀 Quick Start
 
+Choose your preferred deployment method:
+
+### Option 1: Local CLI Tool
+
+#### Requirements
 - **Node.js 18+** - JavaScript runtime for the CLI tool
 - **Chrome/Chromium** - For PDF generation (optional, falls back to HTML)
 - **Modern web browser** - For the web-based editor
 
-### Dependencies
-- [Handlebars](https://handlebarsjs.com/) for templating
-- [Puppeteer](https://pptr.dev/) for PDF generation
-- [Commander.js](https://github.com/tj/commander.js) for CLI interface
-
-
-## 🚀 Quick Start
-
-Follow these steps to create your professional CV:
-
-### 1. Installation
+#### Installation
 
 ```bash
 # Install Node.js dependencies
@@ -119,6 +124,89 @@ node src/generate.js generate \
 ```
 
 Your generated CV will be saved in the `output/` directory!
+
+### Option 2: Cloudflare Worker API
+
+Deploy CVGen as a powerful API with AI capabilities on Cloudflare Workers.
+
+#### Features
+- **RESTful API** - Generate CVs programmatically via HTTP endpoints
+- **Multiple Formats** - Automatic generation of HTML, PDF, and Markdown
+- **R2 Storage** - All CV assets stored in Cloudflare R2 with public URLs
+- **Request Logging** - Complete request history stored in D1 database
+- **AI Assistant** - Chat with an AI agent about your CV history
+- **Vector Search** - Semantic search through all your generated CVs
+- **OpenAPI Docs** - Auto-generated API documentation
+
+#### Quick Deploy
+
+```bash
+# Install dependencies
+npm install
+
+# Build the worker
+npm run build
+
+# Create Cloudflare resources
+wrangler d1 create cvgen-db
+wrangler r2 bucket create cv-assets
+wrangler vectorize create cv-embeddings --dimensions=768 --metric=cosine
+
+# Update wrangler.toml with resource IDs
+
+# Initialize database
+npm run worker:init-db
+
+# Deploy to Cloudflare
+npm run deploy
+```
+
+#### API Usage
+
+**Generate a CV:**
+```bash
+curl -X POST https://your-worker.workers.dev/api/generate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "profile": {
+      "name": "John Doe",
+      "position": "Software Engineer",
+      "email": "john@example.com",
+      "phone": "+1234567890"
+    },
+    "summary": "Experienced developer...",
+    "education": [...],
+    "skills": {...}
+  }'
+```
+
+**Response:**
+```json
+{
+  "id": "uuid-here",
+  "html_url": "https://cv-assets.yourdomain.com/cv/uuid/resume.html",
+  "pdf_url": "https://cv-assets.yourdomain.com/cv/uuid/resume.pdf",
+  "markdown_url": "https://cv-assets.yourdomain.com/cv/uuid/resume.md",
+  "created_at": "2024-11-01T..."
+}
+```
+
+**Chat with AI Assistant:**
+```bash
+curl -X POST https://your-worker.workers.dev/api/chat \
+  -H "Content-Type: application/json" \
+  -d '{
+    "message": "What skills have I used most in my CVs?"
+  }'
+```
+
+**View your CVs:**
+- Frontend: `https://your-worker.workers.dev/`
+- History: `https://your-worker.workers.dev/history`
+- AI Chat: `https://your-worker.workers.dev/chat`
+- API Docs: `https://your-worker.workers.dev/openapi.json`
+
+For detailed setup instructions, see [WORKER_README.md](WORKER_README.md).
 
 ## 🏗️ Architecture
 
