@@ -7,6 +7,10 @@
   "scripts": {
     "start": "node src/generate.js",
     "generate": "node src/generate.js generate",
+    "build": "tsc && cp -r worker/src/frontend/css worker/src/frontend/js worker/src/frontend/img dist/ 2>/dev/null || true",
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "worker:init-db": "wrangler d1 execute cvgen-db --remote --file=./worker/schema.sql",
     "lint": "eslint src/ docs/js/",
     "lint:fix": "eslint src/ docs/js/ --fix",
     "format": "prettier --write src/ docs/",
@@ -25,6 +29,8 @@
   "author": "JobPare Team",
   "license": "MIT",
   "dependencies": {
+    "@cloudflare/ai": "^1.2.2",
+    "@hono/zod-openapi": "^1.1.4",
     "ajv": "^8.17.1",
     "ajv-errors": "^3.0.0",
     "ajv-formats": "^2.1.1",
@@ -32,15 +38,24 @@
     "commander": "^11.0.0",
     "fs-extra": "^11.3.0",
     "handlebars": "^4.7.8",
-    "puppeteer": "^24.16.2"
+    "hono": "^4.10.4",
+    "puppeteer": "^24.16.2",
+    "turndown": "^7.2.2",
+    "yaml": "^2.8.1",
+    "zod": "^4.1.12"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20251014.0",
     "@eslint/js": "^9.35.0",
+    "@types/node": "^24.9.2",
+    "@types/turndown": "^5.0.6",
     "eslint": "^8.57.1",
     "globals": "^16.4.0",
     "jest": "^29.7.0",
     "nodemon": "^3.0.1",
-    "prettier": "^3.0.3"
+    "prettier": "^3.0.3",
+    "typescript": "^5.9.3",
+    "wrangler": "^4.45.3"
   },
   "engines": {
     "node": ">=18.0.0"
