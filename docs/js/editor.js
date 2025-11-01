@@ -11,6 +11,19 @@ class CVEditor {
   }
 
   // ===========================================
+  // UTILITY FUNCTIONS
+  // ===========================================
+
+  /**
+   * Escape HTML to prevent XSS attacks
+   */
+  escapeHTML(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  // ===========================================
   // INITIALIZATION & SETUP
   // ===========================================
 
@@ -446,13 +459,25 @@ class CVEditor {
   }
 
   showPreviewError(error, container) {
-    container.innerHTML = `
-      <div class="preview-placeholder">
-        <i class="fas fa-exclamation-triangle"></i>
-        <p>Error generating preview</p>
-        <small>${error.message}</small>
-      </div>
-    `;
+    // Create elements safely to prevent XSS
+    const placeholder = document.createElement('div');
+    placeholder.className = 'preview-placeholder';
+    
+    const icon = document.createElement('i');
+    icon.className = 'fas fa-exclamation-triangle';
+    
+    const message = document.createElement('p');
+    message.textContent = 'Error generating preview';
+    
+    const details = document.createElement('small');
+    details.textContent = error.message || 'Unknown error';
+    
+    placeholder.appendChild(icon);
+    placeholder.appendChild(message);
+    placeholder.appendChild(details);
+    
+    container.innerHTML = '';
+    container.appendChild(placeholder);
   }
 
   // ===========================================
@@ -545,11 +570,13 @@ class CVEditor {
       const html = this.generateHTML();
 
       const printWindow = window.open('', '_blank');
+      // Safely escape the name to prevent XSS
+      const safeName = this.escapeHTML(this.cvData.profile?.name || 'CV');
       printWindow.document.write(`
         <!DOCTYPE html>
         <html>
         <head>
-          <title>CV - ${this.cvData.profile?.name || 'CV'}</title>
+          <title>CV - ${safeName}</title>
           <style>
             body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }
             @media print { body { margin: 0; padding: 0; } }
