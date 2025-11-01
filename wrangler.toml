@@ -17,6 +17,8 @@ bucket_name = "cv-assets"
 [[d1_databases]]
 binding = "DB"
 database_name = "cvgen-db"
+# IMPORTANT: Replace with your actual database ID after running:
+# wrangler d1 create cvgen-db
 database_id = "your-database-id"
 
 # Vectorize for CV content search
