@@ -1,0 +1,46 @@
+name = "cvgen-worker"
+main = "worker/src/index.ts"
+compatibility_date = "2024-11-01"
+compatibility_flags = ["nodejs_compat"]
+
+# KV Namespaces for caching
+# [[kv_namespaces]]
+# binding = "CACHE"
+# id = "your-kv-namespace-id"
+
+# R2 Buckets for storing CV assets
+[[r2_buckets]]
+binding = "CV_ASSETS"
+bucket_name = "cv-assets"
+
+# D1 Database for request logging
+[[d1_databases]]
+binding = "DB"
+database_name = "cvgen-db"
+# IMPORTANT: Replace with your actual database ID after running:
+# wrangler d1 create cvgen-db
+database_id = "your-database-id"
+
+# Vectorize for CV content search
+[[vectorize]]
+binding = "VECTORIZE"
+index_name = "cv-embeddings"
+
+# AI Binding
+[ai]
+binding = "AI"
+
+# Browser Rendering
+[browser]
+binding = "BROWSER"
+
+# Durable Objects (if needed for chat sessions)
+# [[durable_objects.bindings]]
+# name = "CHAT_SESSION"
+# class_name = "ChatSession"
+
+[build]
+command = "npm run build"
+
+[observability]
+enabled = true

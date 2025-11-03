@@ -4,9 +4,15 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Output files
+# Build output
+dist/
 output/
 *.pdf
+
+# Cloudflare
+.wrangler/
+.dev.vars
+wrangler.toml.local
 
 # OS files
 .DS_Store
