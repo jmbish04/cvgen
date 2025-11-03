@@ -1,12 +1,12 @@
-name = "cvgen-worker"
+name = "cvgen-api"
 main = "worker/src/index.ts"
 compatibility_date = "2024-11-01"
 compatibility_flags = ["nodejs_compat"]
 
 # KV Namespaces for caching
-# [[kv_namespaces]]
-# binding = "CACHE"
-# id = "your-kv-namespace-id"
+[[kv_namespaces]]
+binding = "CACHE"
+id = "76402e4a1ad7471eb3995ee08ea22aa6"
 
 # R2 Buckets for storing CV assets
 [[r2_buckets]]
@@ -17,9 +17,8 @@ bucket_name = "cv-assets"
 [[d1_databases]]
 binding = "DB"
 database_name = "cvgen-db"
-# IMPORTANT: Replace with your actual database ID after running:
-# wrangler d1 create cvgen-db
-database_id = "your-database-id"
+database_id = "https://github.com/cloudflare/vibesdk"
+migrations_dir = "migrations" 
 
 # Vectorize for CV content search
 [[vectorize]]
@@ -35,9 +34,13 @@ binding = "AI"
 binding = "BROWSER"
 
 # Durable Objects (if needed for chat sessions)
-# [[durable_objects.bindings]]
-# name = "CHAT_SESSION"
-# class_name = "ChatSession"
+[[durable_objects.bindings]]
+name = "CHAT_SESSION"
+class_name = "ChatSession"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["ChatSession"]
 
 [build]
 command = "npm run build"
