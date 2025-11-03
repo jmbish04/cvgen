@@ -255,7 +255,7 @@ export function createAPIRoutes(app: OpenAPIHono<{ Bindings: Env }>) {
     request: {
       query: z.object({
         q: z.string().min(1),
-        limit: z.string().optional().default('10'),
+        limit: z.coerce.number().int().min(1).max(50).optional().default(10),
       }),
     },
     responses: {
