@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         function renderResults(results) {
             resultsContainer.innerHTML = '';
-            if (!results) {
+            if (!results || results.length === 0) {
                 resultsContainer.innerHTML = '<p>No test results yet.</p>';
                 return;
             }
