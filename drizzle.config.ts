@@ -1,0 +1,11 @@
+import type { Config } from 'drizzle-kit';
+
+export default {
+    schema: './src/db/schema.ts',
+    out: './migrations',
+    dialect: 'sqlite',
+    dbCredentials: {
+        wranglerConfigPath: './wrangler.jsonc',
+        dbName: 'vibe-db',
+    },
+} satisfies Config;

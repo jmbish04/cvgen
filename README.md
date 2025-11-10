@@ -509,4 +509,52 @@ See [Contribution.md](./Contribution.md) for the project roadmap and ways to con
 
 **Happy CV building! 🎉**
 
+## ORM Architecture
+
+This project uses a hybrid ORM architecture combining Drizzle ORM and Kysely.
+
+- **Drizzle ORM** is used for schema definition, type inference, and migrations.
+- **Kysely** is used for advanced/dynamic query composition.
+
+### Schema
+
+The database schema is defined in `src/db/schema.ts` using Drizzle's syntax.
+
+### Migrations
+
+Migrations are managed with `drizzle-kit`. To generate a new migration, run:
+
+```bash
+npx drizzle-kit generate
+```
+
+To apply migrations, run:
+
+```bash
+npx wrangler d1 migrations apply vibe-db
+```
+
+### Querying
+
+The `src/db/client.ts` file initializes and exports Drizzle and Kysely clients.
+
+**Drizzle** is used for simple CRUD operations:
+
+```typescript
+import { initDb } from './src/db/client';
+import * as schema from './src/db/schema';
+
+const db = initDb(env);
+await db.drizzle.insert(schema.testResults).values({ ... }).run();
+```
+
+**Kysely** is used for more complex queries:
+
+```typescript
+import { initDb } from './src/db/client';
+
+const db = initDb(env);
+const results = await db.kysely.selectFrom('test_results').selectAll().execute();
+```
+
 For questions or support, please open an issue on GitHub. 

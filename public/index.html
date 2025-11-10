@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VibeApp</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="/styles.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50">
+
+    <!-- Hero -->
+    <header class="bg-indigo-600 text-white text-center py-20">
+        <h1 class="text-5xl font-bold">VibeApp</h1>
+        <p class="text-xl mt-4">Your all-in-one solution for amazing things.</p>
+        <div class="mt-8">
+            <a href="/health.html" class="bg-white text-indigo-600 font-bold py-3 px-6 rounded-full hover:bg-indigo-100">Explore System</a>
+            <a href="/openapi.json" class="ml-4 border-2 border-white text-white font-bold py-3 px-6 rounded-full hover:bg-white hover:text-indigo-600">View API Spec</a>
+        </div>
+    </header>
+
+    <!-- Features -->
+    <main class="container mx-auto px-4 py-16">
+        <section class="text-center">
+            <h2 class="text-3xl font-bold mb-8">Features</h2>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="p-8 bg-white rounded-lg shadow-md fade-in-up">
+                    <h3 class="text-xl font-bold mb-4">Multi-Protocol</h3>
+                    <p>REST, WebSocket, RPC, and MCP support out of the box.</p>
+                </div>
+                <div class="p-8 bg-white rounded-lg shadow-md fade-in-up">
+                    <h3 class="text-xl font-bold mb-4">Self-Healing</h3>
+                    <p>Automated testing and AI-powered failure analysis.</p>
+                </div>
+                <div class="p-8 bg-white rounded-lg shadow-md fade-in-up">
+                    <h3 class="text-xl font-bold mb-4">Dynamic OpenAPI</h3>
+                    <p>Always-current API documentation generated from code.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="/client.js"></script>
+</body>
+</html>

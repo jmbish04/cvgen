@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Health - VibeApp</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/heroui@1.3.0/dist/css/heroui.min.css" rel="stylesheet">
+    <link href="/styles.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+
+    <div id="health-dashboard" class="container mx-auto px-4 py-8">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-3xl font-bold">System Health</h1>
+            <button id="run-tests-btn" class="bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-indigo-700">Run Health Tests</button>
+        </div>
+
+        <section class="mb-8">
+            <h2 class="text-2xl font-semibold mb-4">Active Tests</h2>
+            <div id="test-defs" class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Test definitions will be loaded here -->
+            </div>
+        </section>
+
+        <section>
+            <h2 class="text-2xl font-semibold mb-4">Latest Results</h2>
+            <div id="results-container" class="bg-white p-4 rounded-lg shadow">
+                <!-- Test results will be loaded here -->
+            </div>
+        </section>
+    </div>
+
+    <script src="/client.js"></script>
+</body>
+</html>
