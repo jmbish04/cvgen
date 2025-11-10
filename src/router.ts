@@ -47,17 +47,17 @@ app.post("/api/tests/run", async (c) => {
 
 app.get("/api/tests/session/:id", async (c) => {
     const { id } = c.req.param();
-    const results = await getSessionById(c.env.DB, id);
+    const results = await getSessionById(c.env, id);
     return c.json(results);
 });
 
 app.get("/api/tests/defs", async (c) => {
-    const defs = await listActiveTests(c.env.DB);
+    const defs = await listActiveTests(c.env);
     return c.json(defs);
 });
 
 app.get("/api/health", async (c) => {
-    const latestSession = await getLatestSession(c.env.DB);
+    const latestSession = await getLatestSession(c.env);
     const status = latestSession?.every(r => r.status === 'pass') ? 'healthy' : 'unhealthy';
     return c.json({ status, lastCheck: new Date().toISOString() });
 });

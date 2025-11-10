@@ -1,16 +1,15 @@
 import { Env } from '../types';
 import { getDefaultTestDefs } from './defs';
-import { getKysely, insertTestResult, listActiveTests } from '../utils/db';
+import { insertTestResult, listActiveTests } from '../utils/db';
 import { analyzeFailure } from '../utils/ai';
 import { buildRouter } from '../router';
+import { initDb } from '../db/client';
+import * as schema from '../db/schema';
 
 async function seedTests(env: Env) {
-    const db = env.DB;
-    const inserts = getDefaultTestDefs().map(def =>
-        db.prepare('INSERT INTO test_defs (id, name, description, category, severity, is_active, error_map) VALUES (?, ?, ?, ?, ?, ?, ?)')
-            .bind(def.id, def.name, def.description, def.category, def.severity, def.is_active, def.error_map)
-    );
-    await db.batch(inserts);
+    const { drizzle } = initDb(env);
+    const defs = getDefaultTestDefs();
+    await drizzle.insert(schema.testDefs).values(defs).run();
 }
 
 // Mock test implementations
@@ -47,11 +46,11 @@ const testRunners: Record<string, (app: ReturnType<typeof buildRouter>, env: Env
 };
 
 export async function runAllTests(env: Env, session_uuid: string) {
-    let activeTests = await listActiveTests(env.DB);
+    let activeTests = await listActiveTests(env);
 
     if (activeTests.length === 0) {
         await seedTests(env);
-        activeTests = await listActiveTests(env.DB);
+        activeTests = await listActiveTests(env);
     }
 
     const app = buildRouter();
@@ -80,17 +79,17 @@ export async function runAllTests(env: Env, session_uuid: string) {
         const finished_at = new Date().toISOString();
         const duration_ms = new Date(finished_at).getTime() - new Date(started_at).getTime();
 
-        await insertTestResult(env.DB, {
-            session_uuid,
-            test_fk: testDef.id,
-            started_at,
-            finished_at,
-            duration_ms,
-            status,
-            error_code,
-            raw,
-            ai_human_readable_error_description,
-            ai_prompt_to_fix_error,
+        await insertTestResult(env, {
+            sessionUuid: session_uuid,
+            testFk: testDef.id,
+            startedAt: started_at,
+            finishedAt: finished_at,
+            durationMs: duration_ms,
+            status: status,
+            errorCode: error_code,
+            raw: raw,
+            aiHumanReadableErrorDescription: ai_human_readable_error_description,
+            aiPromptToFixError: ai_prompt_to_fix_error,
         });
     });
 
