@@ -1,20 +1,18 @@
 {
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "ES2022",
-    "lib": ["ES2022"],
+    "target": "esnext",
+    "module": "esnext",
     "moduleResolution": "node",
+    "lib": ["esnext"],
     "esModuleInterop": true,
-    "skipLibCheck": true,
     "strict": true,
     "resolveJsonModule": true,
-    "allowSyntheticDefaultImports": true,
-    "forceConsistentCasingInFileNames": true,
-    "types": ["@cloudflare/workers-types", "@types/node"],
-    "jsx": "react",
-    "outDir": "./dist",
-    "rootDir": "./worker/src"
+    "jsx": "preserve",
+    "types": [
+      "@cloudflare/workers-types",
+      "jest"
+    ]
   },
-  "include": ["worker/src/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules"]
 }
